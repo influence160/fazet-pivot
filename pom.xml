@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.ott.fazet</groupId>
+  <artifactId>fazet-pivot</artifactId>
+  <packaging>pom</packaging>
+  <version>0.1</version>
+  <name>fazet-pivot</name>
+  <url>http://www.ott.com</url>
+  <description>Fazet Pivot is a Table view for Apache Pivot that allow cells and columns selection</description>
+  
+  <properties>
+  	<applicationVersion>0.1</applicationVersion>
+  </properties>
+  
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.1</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+  
+  <modules>
+    <module>wtk</module>
+    <module>wtk-terra</module>
+    <module>demos</module>
+  </modules>
+</project>
