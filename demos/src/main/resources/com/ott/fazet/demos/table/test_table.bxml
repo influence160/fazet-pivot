@@ -17,8 +17,8 @@ limitations under the License.
 -->
 <view:TheWindow title="Hello JavaScript!" maximized="true"
     xmlns:bxml="http://pivot.apache.org/bxml"
-    xmlns:view="com.ott.pivott.demos.table"
-    xmlns:ott="com.ott.pivott.wtk"
+    xmlns:view="com.ott.fazet.demos.table"
+    xmlns:ott="com.ott.fazet.wtk"
     xmlns="org.apache.pivot.wtk">
 	    <ScrollPane>
 	<BoxPane orientation="vertical" styles="{padding:20}">
