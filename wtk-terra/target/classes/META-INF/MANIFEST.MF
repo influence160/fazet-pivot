@@ -1,9 +1,0 @@
-Manifest-Version: 1.0
-Archiver-Version: Plexus Archiver
-Created-By: Apache Maven
-Built-By: Othmen TILIOUINE
-Build-Jdk: 1.7.0_10
-Implementation-Vendor-Id: com.ott
-Implementation-Vendor: Othmen TILIOUINE
-Implementation-Title: Fazet pivot wtk-terra
-Implementation-Version: 0.1
