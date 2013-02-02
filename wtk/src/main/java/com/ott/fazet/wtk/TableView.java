@@ -1507,15 +1507,16 @@ public abstract class TableView extends Component {
         setSelectedRanges(selectedRanges);
     }
     
+    //TODO abstract & javadoc
     public void setSelectedPerimeter(int startX, int endX, int startY, int endY) {
     	Span x = new Span(startX, endX);
     	Span y = new Span(startY, endY);
     	setSelectedPerimeter(x, y);
     }
     
-    //TODO
+    
     /**
-     * Sets the selection to a single range.
+     * Sets the selection to a single perimeter.
      *
      * @param start
      * @param end
@@ -1652,6 +1653,8 @@ public abstract class TableView extends Component {
 
         return selectedRanges;
     }
+    
+    //TODO setSelectedPerimeters(String)
 
     /**
      * Returns the first selected index.
@@ -1668,7 +1671,8 @@ public abstract class TableView extends Component {
      *
      * @return
      * The first selected index, or <tt>-1</tt> if nothing is selected.
-     */
+     *///abstract
+    //TODO correction
     public Point getFirstSelectedPoint() {
     	if (perimeterSelection.getLength() > 0) {
     		int x = perimeterSelection.get(0).x.start;
@@ -1688,6 +1692,18 @@ public abstract class TableView extends Component {
         return (rangeSelection.getLength() > 0) ?
             rangeSelection.get(rangeSelection.getLength() - 1).end : -1;
     }
+    
+    //abstract
+    //TODO correction & javadoc
+    public Point getLastSelectedPoint() {
+        if (perimeterSelection.getLength() > 0) {
+        	Rectangle lastSelectedRange = perimeterSelection.get(perimeterSelection.getLength() - 1);
+    		int x = lastSelectedRange.x.end;
+    		int y = lastSelectedRange.y.end;
+    		return new Point(x, y);
+        }
+        return null;
+    }
 
     /**
      * Adds a single index to the selection.
@@ -1704,6 +1720,8 @@ public abstract class TableView extends Component {
         return (addedRanges.getLength() > 0);
     }
 
+    public abstract boolean addSelectedCell(int columnIndex, int rowIndex);
+    
     /**
      * Adds a range of indexes to the selection.
      *
@@ -1743,6 +1761,8 @@ public abstract class TableView extends Component {
 
         return addedRanges;
     }
+    
+    public abstract Sequence<Rectangle> addSelectedPerimeter(Span x, Span y); 
 
     /**
      * Adds a range of indexes to the selection.
@@ -1775,6 +1795,8 @@ public abstract class TableView extends Component {
         Sequence<Span> removedRanges = removeSelectedRange(index, index);
         return (removedRanges.getLength() > 0);
     }
+
+    public abstract boolean removeSelectedCell(int columntIndex, int rowIndex);
 
     /**
      * Removes a range of indexes from the selection.
@@ -1814,6 +1836,16 @@ public abstract class TableView extends Component {
         }
 
         return removedRanges;
+    }
+
+    public abstract Sequence<Rectangle> removeSelectedPerimeter(Span x, Span y);
+    
+    public Sequence<Rectangle> removeSelectedPerimeter(Rectangle perimeter){
+        if (perimeter == null) {
+            throw new IllegalArgumentException("perimeter is null.");
+        }
+
+        return removeSelectedPerimeter(perimeter.x, perimeter.y);
     }
 
     /**

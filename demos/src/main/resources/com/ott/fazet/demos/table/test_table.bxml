@@ -24,9 +24,9 @@ limitations under the License.
 	<BoxPane orientation="vertical" styles="{padding:20}">
     <BoxPane>
 	    <BoxPane orientation="vertical">
-			<Label text="Ott Table view"/>
+			<Label text="Fazet Table view"/>
 		    <ScrollPane>
-				<ott:FazetTableView bxml:id="tableView" selectMode="SINGLECELL" height="400">
+				<ott:FazetTableView bxml:id="tableView" selectMode="MULTICELLS" height="400">
 				    <columns>
 				        <ott:TableView.Column name="i" width="75" headerData="i"/>
 				        <ott:TableView.Column name="a" width="75" headerData="a"/>
@@ -68,7 +68,7 @@ limitations under the License.
 		<BoxPane orientation="vertical">
 			<Label text="Pivot Table view"/>
 		    <ScrollPane>
-				<TableView bxml:id="tableView2" selectMode="SINGLE" height="400">
+				<TableView bxml:id="tableView2" selectMode="MULTI" height="400">
 				    <columns>
 				        <TableView.Column name="i" width="75" headerData="i"/>
 				        <TableView.Column name="a" width="75" headerData="a"/>

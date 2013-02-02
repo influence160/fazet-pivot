@@ -1223,7 +1223,7 @@ public class TerraFazetTableViewSkin extends ComponentSkin implements TableView.
 	
 	    highlightIndex = -1;
 	    highlightPoint = null;
-	    selectIndex = -1;//TODO pk ???
+	    selectIndex = -1;//TODO why ???
 	}
 	
 	@Override
@@ -1304,42 +1304,57 @@ public class TerraFazetTableViewSkin extends ComponentSkin implements TableView.
 		            Keyboard.Modifier commandModifier = Platform.getCommandModifier();
 		
 		            if (Keyboard.isPressed(Keyboard.Modifier.SHIFT)
-		                && selectMode == TableView.SelectMode.MULTI) {
+		                && selectMode == TableView.SelectMode.MULTICELLS) {
 		                Filter<?> disabledRowFilter = tableView.getDisabledRowFilter();
 		
 		                if (disabledRowFilter == null) {
 		                    // Select the range
-		                    int startIndex = tableView.getFirstSelectedIndex();
-		                    int endIndex = tableView.getLastSelectedIndex();
+		                    Point startPoint = tableView.getFirstSelectedPoint();
+		                    Point endPoint = tableView.getLastSelectedPoint();
 		                    // if there is nothing currently selected, selected the indicated row
-		                    if (startIndex == -1) {
-		                        tableView.addSelectedIndex(rowIndex);
+		                    if (endPoint == null) {
+		                        tableView.addSelectedCell(columnIndex, rowIndex);
 		                    } else {
 		                        // otherwise select the range of rows
-		                        Span selectedRange = (rowIndex > startIndex) ?
-		                            new Span(startIndex, rowIndex) : new Span(rowIndex, endIndex);
-		
-		                        ArrayList<Span> selectedRanges = new ArrayList<Span>();
-		                        selectedRanges.add(selectedRange);
-		
-		                        tableView.setSelectedRanges(selectedRanges);
+		                    	int xStart = endPoint.x;
+		                    	int yStart = endPoint.y;
+		                    	Span selectedPerimeterX = new Span(Math.min(xStart, columnIndex),
+		                    			Math.max(xStart, columnIndex));
+		                    	Span selectedPerimeterY = new Span(Math.min(yStart, rowIndex),
+		                    			Math.max(yStart, rowIndex));
+		                    	com.ott.fazet.wtk.Rectangle selectedPerimeter = new com.ott.fazet.wtk.Rectangle(selectedPerimeterX,
+		                    			selectedPerimeterY);
+		                        if (Keyboard.isPressed(commandModifier)) {
+		                        	//if CTRL is pressed then add selectedPerimeter to the current selected perimeters
+		                        	Sequence<com.ott.fazet.wtk.Rectangle> addedPerimeters = 
+		                        			tableView.addSelectedPerimeter(selectedPerimeter.x, selectedPerimeter.y);
+		                        	if (addedPerimeters == null || addedPerimeters.getLength() == 0) {
+		                        		//if all the added perimeter is already selected thend do the inverse and deselect it
+		                        		tableView.removeSelectedPerimeter(selectedPerimeter);
+		                        	}
+		                        } else {
+		                        	//set selectedPerimeter as the current selected perimeters
+			                        ArrayList<com.ott.fazet.wtk.Rectangle> selectedPerimeters = new ArrayList<com.ott.fazet.wtk.Rectangle>();
+			                        selectedPerimeters.add(selectedPerimeter);
+			                        tableView.setSelectedPerimeters(selectedPerimeters);
+		                        }
 		                    }
 		                }
 		            } else if (Keyboard.isPressed(commandModifier)
-		                && selectMode == TableView.SelectMode.MULTI) {
+		                && selectMode == TableView.SelectMode.MULTICELLS) {
 		                // Toggle the item's selection state
-		                if (tableView.isRowSelected(rowIndex)) {
-		                    tableView.removeSelectedIndex(rowIndex);
+		                if (tableView.isCellSelected(columnIndex, rowIndex)) {
+		                    tableView.removeSelectedCell(columnIndex, rowIndex);
 		                } else {
-		                    tableView.addSelectedIndex(rowIndex);
+		                    tableView.addSelectedCell(columnIndex, rowIndex);
 		                }
 		            } else if (Keyboard.isPressed(commandModifier)
-		                && selectMode == TableView.SelectMode.SINGLE) {
+		                && selectMode == TableView.SelectMode.SINGLECELL) {
 		                // Toggle the item's selection state
-		                if (tableView.isRowSelected(rowIndex)) {
-		                    tableView.setSelectedIndex(-1);
+		                if (tableView.isCellSelected(columnIndex, rowIndex)) {
+		                    tableView.setSelectedCell(-1, -1);
 		                } else {
-		                    tableView.setSelectedIndex(rowIndex);
+		                    tableView.setSelectedCell(columnIndex, rowIndex);
 		                }
 		            } else {
 	                    if (tableView.isCellSelected(columnIndex, rowIndex)) {

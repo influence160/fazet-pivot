@@ -3,6 +3,7 @@ package com.ott.fazet.wtk;
 import java.util.Comparator;
 
 import org.apache.pivot.collections.ArrayList;
+import org.apache.pivot.collections.List;
 import org.apache.pivot.collections.Sequence;
 import org.apache.pivot.collections.immutable.ImmutableList;
 import org.apache.pivot.wtk.Point;
@@ -12,6 +13,12 @@ import org.apache.pivot.wtk.Span;
  * Class for managing a set of indexed range selections.
  */
 public class PerimeterSelection {
+	
+	private static enum Axe{
+		X,
+		Y
+	}
+	
     // The coalesced selected ranges
     private ArrayList<Rectangle> selectedPerimeters = new ArrayList<Rectangle>();
 
@@ -83,7 +90,7 @@ public class PerimeterSelection {
         }
     };
 
-
+	
     /**
      * Adds a perimeter to the selection, merging and removing intersecting ranges
      * as needed.
@@ -95,94 +102,47 @@ public class PerimeterSelection {
      * A rectangle containing the perimeter that were added.
      */
     public Sequence<Rectangle> addPerimeter(Span x, Span y) {
+    	
         ArrayList<Rectangle> addedPerimeters = new ArrayList<Rectangle>();
-
-        Rectangle perimeter = normalize(x, y);
-        assert(perimeter.x.start >= 0);
-        assert(perimeter.y.start >= 0);
-
-        int n = selectedPerimeters.getLength();
-
-        if (n == 0) {
-            // The selection is currently empty; append the new range
-            // and add it to the added range list
-        	selectedPerimeters.add(perimeter);
-        	addedPerimeters.add(perimeter);
-        } else {
-        	System.out.println("addPerimeter not empty");
-        	//TODO
-//            // Locate the lower bound of the intersection
-//            int i = ArrayList.binarySearch(selectedPerimeters, perimeter, START_COMPARATOR);
-//            if (i < 0) {
-//                i = -(i + 1);
-//            }
-//
-//            // Merge the selection with the previous range, if necessary
-//            if (i > 0) {
-//                Span previousRange = selectedRanges.get(i - 1);
-//                if (range.start == previousRange.end + 1) {
-//                    i--;
-//                }
-//            }
-//
-//            if (i == n) {
-//                // The new range starts after the last existing selection
-//                // ends; append it and add it to the added range list
-//                selectedRanges.add(range);
-//                addedRanges.add(range);
-//            } else {
-//                // Locate the upper bound of the intersection
-//                int j = ArrayList.binarySearch(selectedRanges, range, END_COMPARATOR);
-//                if (j < 0) {
-//                    j = -(j + 1);
-//                } else {
-//                    j++;
-//                }
-//
-//                // Merge the selection with the next range, if necessary
-//                if (j < n) {
-//                    Span nextRange = selectedRanges.get(j);
-//                    if (range.end == nextRange.start - 1) {
-//                        j++;
-//                    }
-//                }
-//
-//                if (i == j) {
-//                    selectedRanges.insert(range, i);
-//                    addedRanges.add(range);
-//                } else {
-//                    // Create a new range representing the union of the intersecting ranges
-//                    Span lowerRange = selectedRanges.get(i);
-//                    Span upperRange = selectedRanges.get(j - 1);
-//
-//                    range = new Span(Math.min(range.start, lowerRange.start),
-//                        Math.max(range.end, upperRange.end));
-//
-//                    // Add the gaps to the added list
-//                    if (range.start < lowerRange.start) {
-//                        addedRanges.add(new Span(range.start, lowerRange.start - 1));
-//                    }
-//
-//                    for (int k = i; k < j - 1; k++) {
-//                        Span selectedRange = selectedRanges.get(k);
-//                        Span nextSelectedRange = selectedRanges.get(k + 1);
-//                        addedRanges.add(new Span(selectedRange.end + 1, nextSelectedRange.start - 1));
-//                    }
-//
-//                    if (range.end > upperRange.end) {
-//                        addedRanges.add(new Span(upperRange.end + 1, range.end));
-//                    }
-//
-//                    // Remove all redundant ranges
-//                    selectedRanges.update(i, range);
-//
-//                    if (i < j) {
-//                        selectedRanges.remove(i + 1, j - i - 1);
-//                    }
-//                }
-//            }
+        final Rectangle perimeter = normalize(x, y);
+        final int n = selectedPerimeters.getLength();
+        
+        ArrayList<Rectangle> rectanglesToAdd = new ArrayList<Rectangle>();
+        rectanglesToAdd.add(perimeter);
+        for (int k = 0; k < selectedPerimeters.getLength(); k++) {
+        	Rectangle selectedPerimeter = selectedPerimeters.get(k);
+        	for (int h = 0; h < rectanglesToAdd.getLength(); h++) {
+        		Rectangle toAdd = rectanglesToAdd.get(h);
+            	if (toAdd.intersects(selectedPerimeter)) {
+            		if (selectedPerimeter.contains(toAdd)) {
+            			rectanglesToAdd.remove(toAdd);
+            			h--;
+            		} else if (toAdd.contains(selectedPerimeter)) {
+            			selectedPerimeters.remove(selectedPerimeter);
+            			k--;
+            			break;
+            			//addedPerimeters.add(toAdd);
+            		} else {
+            			ImmutableList<Rectangle> substraction = toAdd.substract(selectedPerimeter);
+        				rectanglesToAdd.remove(toAdd);
+            			for (Rectangle rect : substraction) {
+            				rectanglesToAdd.add(rect);
+            			}
+            		}
+            	}
+        	}
         }
 
+		for (Rectangle rect : rectanglesToAdd) {
+			addedPerimeters.add(rect);
+		}
+		
+		if (rectanglesToAdd.getLength() > 0) {
+			for (Rectangle rect : rectanglesToAdd) {
+				selectedPerimeters.add(rect);
+			}
+		}
+		
         return addedPerimeters;
     }
 
@@ -206,70 +166,28 @@ public class PerimeterSelection {
         int n = selectedPerimeters.getLength();
 
         if (n > 0) {
-        	System.out.println("removePerimeter not empty");
-        	//TODO
-            // Locate the lower bound of the intersection
-//            int i = ArrayList.binarySearch(selectedRanges, range, START_COMPARATOR);
-//            if (i < 0) {
-//                i = -(i + 1);
-//            }
-//
-//            if (i < n) {
-//                Span lowerRange = selectedRanges.get(i);
-//
-//                if (lowerRange.start < range.start
-//                    && lowerRange.end > range.end) {
-//                    // Removing the range will split the intersecting selection
-//                    // into two ranges
-//                    selectedRanges.update(i, new Span(lowerRange.start, range.start - 1));
-//                    selectedRanges.insert(new Span(range.end + 1, lowerRange.end), i + 1);
-//                    removedRanges.add(range);
-//                } else {
-//                    Span leadingRemovedRange = null;
-//                    if (range.start > lowerRange.start) {
-//                        // Remove the tail of this range
-//                        selectedRanges.update(i, new Span(lowerRange.start, range.start - 1));
-//                        leadingRemovedRange = new Span(range.start, lowerRange.end);
-//                        i++;
-//                    }
-//
-//                    // Locate the upper bound of the intersection
-//                    int j = ArrayList.binarySearch(selectedRanges, range, END_COMPARATOR);
-//                    if (j < 0) {
-//                        j = -(j + 1);
-//                    } else {
-//                        j++;
-//                    }
-//
-//                    if (j > 0) {
-//                        Span upperRange = selectedRanges.get(j - 1);
-//
-//                        Span trailingRemovedRange = null;
-//                        if (range.end < upperRange.end) {
-//                            // Remove the head of this range
-//                            selectedRanges.update(j - 1, new Span(range.end + 1, upperRange.end));
-//                            trailingRemovedRange = new Span(upperRange.start, range.end);
-//                            j--;
-//                        }
-//
-//                        // Remove all cleared ranges
-//                        Sequence<Span> clearedRanges = selectedRanges.remove(i, j - i);
-//
-//                        // Construct the removed range list
-//                        if (leadingRemovedRange != null) {
-//                            removedRanges.add(leadingRemovedRange);
-//                        }
-//
-//                        for (int k = 0, c = clearedRanges.getLength(); k < c; k++) {
-//                            removedRanges.add(clearedRanges.get(k));
-//                        }
-//
-//                        if (trailingRemovedRange != null) {
-//                            removedRanges.add(trailingRemovedRange);
-//                        }
-//                    }
-//                }
-//            }
+            for (int k = 0; k < selectedPerimeters.getLength(); k++) {
+            	Rectangle selectedPerimeter = selectedPerimeters.get(k);
+            	if (perimeter.intersects(selectedPerimeter)) {
+            		if (perimeter.contains(selectedPerimeter)) {
+            			selectedPerimeters.remove(selectedPerimeter);
+            			removedPerimeters.add(selectedPerimeter);
+            			k--;
+            			//addedPerimeters.add(toAdd);
+            		} else {
+            			ImmutableList<Rectangle> substraction = selectedPerimeter.substract(perimeter);
+        				removedPerimeters.add(selectedPerimeter.intersect(perimeter));
+        				selectedPerimeters.remove(selectedPerimeter);
+        				for (Rectangle rect : substraction) {
+        					selectedPerimeters.insert(rect, k);
+            			}
+        				k += substraction.getLength() - 1;
+            			if (selectedPerimeter.contains(perimeter)) {
+            				break;
+            			}
+            		}
+            	}
+            }
         }
 
         return removedPerimeters;
@@ -348,10 +266,15 @@ public class PerimeterSelection {
      * <tt>true</tt> if the index is selected; <tt>false</tt>, otherwise.
      */
     public boolean containsPoint(Point point) {
-        Rectangle range = new Rectangle(point);
-        int i = ArrayList.binarySearch(selectedPerimeters, range, RECTANGLE_INTERSECTION_COMPARATOR);
-
-        return (i == 0);
+        Rectangle rectangle = new Rectangle(point);
+        //int i = ArrayList.binarySearch(selectedPerimeters, range, RECTANGLE_INTERSECTION_COMPARATOR);
+        for (Rectangle selectedPerimeter : selectedPerimeters) {
+        	if (selectedPerimeter.contains(rectangle)) {
+        		return true;
+        	}
+        }
+        //return (i == 0);
+        return false;
     }
 
     /**
@@ -364,37 +287,10 @@ public class PerimeterSelection {
      * The number of ranges that were updated.
      */
     public int insertPoint(Point point) {
-        int updated = 0;
-
-        // Get the insertion point for the range corresponding to the given index
-        Rectangle range = new Rectangle(point);
-        int i = ArrayList.binarySearch(selectedPerimeters, range, RECTANGLE_INTERSECTION_COMPARATOR);
-
-        if (i < 0) {
-            // The inserted index does not intersect with a selected range
-            i = -(i + 1);
-        } else {
-            // The inserted index intersects with a currently selected range
-        	Rectangle selectedRange = selectedPerimeters.get(i);
-//TODO
-//            // If the inserted index falls within the current range, increment
-//            // the endpoint only
-//            if (selectedRange.start < index) {
-//                selectedRanges.update(i, new Span(selectedRange.start, selectedRange.end + 1));
-//
-//                // Start incrementing range bounds beginning at the next range
-//                i++;
-//            }
-        }
-//TODO
-        // Increment any subsequent selection indexes
-//        int n = selectedRanges.getLength();
-//        while (i < n) {
-//            Span selectedRange = selectedRanges.get(i);
-//            selectedRanges.update(i, new Span(selectedRange.start + 1, selectedRange.end + 1));
-//            updated++;
-//            i++;
-//        }
+    	Span x = new Span(point.x, point.x);
+    	Span y = new Span(point.y, point.y);
+    	Sequence<Rectangle> inserted = addPerimeter(x, y);//TODO optimisation
+        int updated = (inserted != null && inserted.getLength() > 0) ? 1 : 0;
 
         return updated;
     }
@@ -411,9 +307,9 @@ public class PerimeterSelection {
      */
     public int removePoints(int x, int y, int countX, int countY) {
         // Clear any selections in the given range
-    	Span spanX = new Span((x + countX) - 1);
-    	Span spanY = new Span((y + countY) - 1);
-        Sequence<Rectangle> removed = removePerimeter(spanX, spanY);
+    	Span spanX = new Span(x, (x + countX) - 1);
+    	Span spanY = new Span(y, (y + countY) - 1);
+        Sequence<Rectangle> removed = removePerimeter(spanX, spanY);//TODO optimisation
         int updated = removed.getLength();
 
         //TODO

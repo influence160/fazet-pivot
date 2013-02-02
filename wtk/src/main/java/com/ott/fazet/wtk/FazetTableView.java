@@ -6,6 +6,8 @@ import org.apache.pivot.collections.Sequence;
 import org.apache.pivot.wtk.Point;
 import org.apache.pivot.wtk.Span;
 
+import com.ott.fazet.wtk.TableView.SelectMode;
+
 public class FazetTableView extends TableView {
 	
     public FazetTableView() {
@@ -36,6 +38,9 @@ public class FazetTableView extends TableView {
 
 	@Override
 	public void setSelectedCell(int columnIndex, int rowIndex) {
+		if(columnIndex == -1) {
+			perimeterSelection.clear();
+		}
 		setSelectedPerimeter(columnIndex, columnIndex, rowIndex, rowIndex);
 	}
 
@@ -121,6 +126,96 @@ public class FazetTableView extends TableView {
         }
         
         return cell;
+	}
+
+	@Override
+	public boolean removeSelectedCell(int columntIndex, int rowIndex) {
+        Sequence<Rectangle> removedPerimeters = removeSelectedPerimeter(new Span(columntIndex, columntIndex)
+        	, new Span(rowIndex, rowIndex));
+        return (removedPerimeters.getLength() > 0);
+	}
+
+	@Override
+	public Sequence<Rectangle> removeSelectedPerimeter(Span x, Span y) {
+        if (selectMode != SelectMode.MULTICELLS) {
+            throw new IllegalStateException("Table view is not in multi-select-rows mode.");
+        }
+
+        if (x.start < 0) {
+            throw new IndexOutOfBoundsException("x.start < 0, " + x.start);
+        }
+        if (y.start < 0) {
+            throw new IndexOutOfBoundsException("y.start < 0, " + y.start);
+        }
+        if (x.end >= columnSequence.getLength()) {
+            throw new IndexOutOfBoundsException("x.end >= tableData.getLength(), "
+                  + x.end + " >= " + tableData.getLength());
+        }
+        if (y.end >= tableData.getLength()) {
+            throw new IndexOutOfBoundsException("y.end >= tableData.getLength(), "
+                  + y.end + " >= " + tableData.getLength());
+        }
+
+        Sequence<Rectangle> removedPerimeters = perimeterSelection.removePerimeter(x, y);
+
+        int n = removedPerimeters.getLength();
+        for (int i = 0; i < n; i++) {
+        	Rectangle removedRange = removedPerimeters.get(i);
+        	//TODO selectedPerimeterRemoved
+            //tableViewSelectionListeners.selectedRangeRemoved(this, removedRange.start, removedRange.end);
+        }
+
+        if (n > 0) {
+        	//TODO selectedPerimetersRemoved
+            //tableViewSelectionListeners.selectedRangesChanged(this, null);
+        }
+
+        return removedPerimeters;
+	}
+
+	@Override
+	public boolean addSelectedCell(int columnIndex, int rowIndex) {
+        Sequence<Rectangle> addedPerimeters = addSelectedPerimeter(new Span(columnIndex, columnIndex)
+        	, new Span(rowIndex, rowIndex));
+        return (addedPerimeters.getLength() > 0);
+	}
+
+	@Override
+	public Sequence<Rectangle> addSelectedPerimeter(Span x, Span y) {
+        if (selectMode != SelectMode.MULTICELLS) {
+            throw new IllegalStateException("Table view is not in multi-select-cells mode.");
+        }
+
+        if (x.start < 0) {
+            throw new IndexOutOfBoundsException("x.start < 0, " + x.start);
+        }
+        if (y.start < 0) {
+            throw new IndexOutOfBoundsException("y.start < 0, " + y.start);
+        }
+        if (x.end >= columnSequence.getLength()) {
+            throw new IndexOutOfBoundsException("x.end >= tableData.getLength(), "
+                  + x.end + " >= " + tableData.getLength());
+        }
+        if (y.end >= tableData.getLength()) {
+            throw new IndexOutOfBoundsException("y.end >= tableData.getLength(), "
+                  + y.end + " >= " + tableData.getLength());
+        }
+
+        Sequence<Rectangle> addedPerimeters= perimeterSelection.addPerimeter(x, y);
+
+        int n = addedPerimeters.getLength();
+        for (int i = 0; i < n; i++) {
+        	Rectangle addedRange = addedPerimeters.get(i);
+        	//TODO selectedPerimeterAdded
+            //tableViewSelectionListeners.selectedRangeAdded(this, addedRange.start, addedRange.end);
+        }
+
+        if (n > 0) {
+        	//TODO selectedPerimetersChanged
+            //tableViewSelectionListeners.selectedRangesChanged(this, null);
+        }
+
+        return addedPerimeters;
 	}
 
 }

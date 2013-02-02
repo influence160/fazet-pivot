@@ -33,15 +33,15 @@ public class TheWindow extends Window implements Bindable {
     public void initialize(Map<String, Object> namespace, URL location, Resources resources)
     {
     	//disable row 5 and 14
-    	tableView.setDisabledRowFilter(new Filter<HashMap<Object, Object>>() {
-
-			@Override
-			public boolean include(HashMap<Object, Object> item) {
-				String index = (String) item.get("i");
-				return index.equals("5") || index.equals("14");
-			}
-    		
-		});
+//    	tableView.setDisabledRowFilter(new Filter<HashMap<Object, Object>>() {
+//
+//			@Override
+//			public boolean include(HashMap<Object, Object> item) {
+//				String index = (String) item.get("i");
+//				return index.equals("5") || index.equals("14");
+//			}
+//    		
+//		});
     	
     	tableView.getComponentMouseButtonListeners().add(new ComponentMouseButtonListener() {
 			

@@ -1,6 +1,9 @@
 package com.ott.fazet.wtk;
 
+import org.apache.pivot.collections.ArrayList;
 import org.apache.pivot.collections.Dictionary;
+import org.apache.pivot.collections.List;
+import org.apache.pivot.collections.immutable.ImmutableList;
 import org.apache.pivot.json.JSONSerializer;
 import org.apache.pivot.serialization.SerializationException;
 import org.apache.pivot.wtk.Point;
@@ -153,14 +156,14 @@ public final class Rectangle {
     }
 
     /**
-     * Calculates the union of this span and another span.
+     * Calculates the union of this rectangle and another rectangle.
      *
      * @param span
      * The span to union with this span.
      *
      * @return
-     * A new Span instance representing the union of this span and
-     * <tt>span</tt>.
+     * A new Rectangle instance representing the union of this rectangle and
+     * <tt>rectangle</tt>.
      */
     public Rectangle union(Rectangle rectangle) {
         if (rectangle == null) {
@@ -169,6 +172,50 @@ public final class Rectangle {
 
         return new Rectangle(x.union(rectangle.x),
     		y.union(rectangle.y));
+    }
+    
+    /**
+     * Calculates the rectangles result from substraction of the
+     * intersection of this rectangle and one other rectangle from 
+     * this rectangle.
+     *
+     * @param rectangle
+     * The rectangle to substract from this rectangle.
+     *
+     * @return
+     * A List of Rectangles representing the rest of the substraction
+     * of a rectangle from this rectangle
+     * <tt>rectangle</tt>.
+     */
+    public ImmutableList<Rectangle> substract(Rectangle rectangle) {
+        if (rectangle == null) {
+            throw new IllegalArgumentException("rectangle is null.");
+        }
+        
+        Rectangle normalized = normalize();
+        List<Rectangle> substraction = new ArrayList<Rectangle>();
+        Rectangle intersection = intersect(rectangle);
+        
+        if(intersection == null){
+        	substraction.add(normalized);
+        } else {
+        	Span xIntersection = normalized.x.intersect(intersection.x);
+        	//Span yIntersection = normalized.y.intersect(intersection.y);
+            SubstractableSpan substractableX = new SubstractableSpan(normalized.x);
+            SubstractableSpan substractableY = new SubstractableSpan(normalized.y);
+            ImmutableList<Span> xSubstraction = substractableX.substract(intersection.x);
+            ImmutableList<Span> ySubstraction = substractableY.substract(intersection.y);
+            
+            for (int i=0; i<xSubstraction.getLength(); i++) {
+            	substraction.add(new Rectangle(xSubstraction.get(i), normalized.y));
+            }
+            
+            for (int j=0; j<ySubstraction.getLength(); j++) {
+            	substraction.add(new Rectangle(xIntersection, ySubstraction.get(j)));
+            }
+        }
+        
+        return new ImmutableList<Rectangle>(substraction);
     }
 
     /**
