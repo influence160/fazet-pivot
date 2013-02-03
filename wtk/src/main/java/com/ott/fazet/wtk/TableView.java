@@ -1018,18 +1018,18 @@ public abstract class TableView extends Component {
         }
 
 		@Override
-		public void selectedCellAdded(FazetTableView tableView, Span rangeX,
+		public void selectedPerimeterAdded(FazetTableView tableView, Span rangeX,
 				Span rangeY) {
 	        for (FazetTableViewSelectionListener listener : this) {
-	            listener.selectedCellAdded(tableView, rangeX, rangeY);
+	            listener.selectedPerimeterAdded(tableView, rangeX, rangeY);
 	        }
 		}
 
 		@Override
-		public void selectedCellRemoved(FazetTableView tableView, Span rangeX,
+		public void selectedPerimeterRemoved(FazetTableView tableView, Span rangeX,
 				Span rangeY) {
 	        for (FazetTableViewSelectionListener listener : this) {
-	            listener.selectedCellRemoved(tableView, rangeX, rangeY);
+	            listener.selectedPerimeterRemoved(tableView, rangeX, rangeY);
 	        }
 		}
 		

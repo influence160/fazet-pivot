@@ -1168,7 +1168,6 @@ public class TerraFazetTableViewSkin extends ComponentSkin implements TableView.
 	
 	    TableView tableView = (TableView)getComponent();
 	    SelectMode selectMode = tableView.getSelectMode();
-	
 	    if (selectMode != SelectMode.NONE && showHighlight) {
 	    	if(selectMode == SelectMode.SINGLE || selectMode == SelectMode.MULTI) {
 	    	    int previousHighlightIndex = this.highlightIndex;
@@ -1185,7 +1184,12 @@ public class TerraFazetTableViewSkin extends ComponentSkin implements TableView.
 	    		}
 	    	} else if (selectMode == SelectMode.SINGLECELL || selectMode == SelectMode.MULTICELLS) {
 	    	    Point previousHighlightPoint = this.highlightPoint;
-	    	    highlightPoint = new Point(getColumnAt(x), getRowAt(y));
+	    	    int columnIndex = getColumnAt(x);
+	    	    if (columnIndex == -1) {
+	    	    	highlightPoint = null;
+	    	    } else {
+		    	    highlightPoint = new Point(columnIndex, getRowAt(y));
+	    	    }
 	    	    
 	    		if(previousHighlightPoint != null && !previousHighlightPoint.equals(highlightIndex)) {
 		            repaintComponent(getCellBounds(previousHighlightPoint.y, previousHighlightPoint.x));
@@ -1742,24 +1746,46 @@ public class TerraFazetTableViewSkin extends ComponentSkin implements TableView.
 	}
 
 	@Override
-	public void selectedCellAdded(FazetTableView tableView, Span rangeX,
+	public void selectedPerimeterAdded(FazetTableView tableView, Span rangeX,
 			Span rangeY) {
-		// TODO Auto-generated method stub
-		
+        if (tableView.isValid()) {
+            Bounds selectionBounds = getCellBounds(rangeY.start, rangeX.start);
+            selectionBounds = selectionBounds.union(getCellBounds(rangeY.end, rangeX.end));
+            repaintComponent(selectionBounds);
+
+            //debug start
+            Bounds _selectionBounds = getRowBounds(rangeY.start);
+            _selectionBounds = _selectionBounds.union(getRowBounds(rangeY.end));
+            System.out.println("selectedPerimeterAdded " + selectionBounds);
+            System.out.println("selectedPerimeterAdded row bounds " + _selectionBounds);
+            //debug end
+            
+            // Ensure that the selection is visible
+            Bounds visibleSelectionBounds = tableView.getVisibleArea(selectionBounds);
+            if (visibleSelectionBounds.height < selectionBounds.height) {
+                tableView.scrollAreaToVisible(selectionBounds);
+            }
+        } else {
+            validateSelection = true;
+        }
 	}
 
 	@Override
-	public void selectedCellRemoved(FazetTableView tableView, Span rangeX,
+	public void selectedPerimeterRemoved(FazetTableView tableView, Span rangeX,
 			Span rangeY) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void selectedCellChanged(FazetTableView tableView,
-			Object previousSelectedCell) {
-		// TODO Auto-generated method stub
-		
+        if (tableView.isValid()) {//TODO see what is this ??
+            Bounds selectionBounds = getCellBounds(rangeY.start, rangeX.start);
+            selectionBounds = selectionBounds.union(getCellBounds(rangeY.end, rangeX.end));
+            
+            //debug start
+            Bounds _selectionBounds = getRowBounds(rangeY.start);
+            _selectionBounds = _selectionBounds.union(getRowBounds(rangeY.end));
+            System.out.println("selectedPerimeterRemoved " + selectionBounds);
+            System.out.println("selectedPerimeterRemoved row bounds " + _selectionBounds);
+            //debug end
+            
+            repaintComponent(selectionBounds);
+        }
 	}
 
 	@Override
@@ -1767,40 +1793,47 @@ public class TerraFazetTableViewSkin extends ComponentSkin implements TableView.
 			Sequence<com.ott.fazet.wtk.Rectangle> previousSelectedPerimeters) {
 	    if (previousSelectedPerimeters != null
 		        && previousSelectedPerimeters != tableView.getSelectedPerimeters()) {
-		        if (tableView.isValid()) {
-		            // Repaint the area occupied by the previous selection
-		            if (previousSelectedPerimeters.getLength() > 0) {
-		                int rangeStart = previousSelectedPerimeters.get(0).y.start;
-		                int rangeEnd = previousSelectedPerimeters.get(previousSelectedPerimeters.getLength() - 1).y.end;
+	        if (tableView.isValid()) {
+	            // Repaint the area occupied by the previous selection
+	            if (previousSelectedPerimeters.getLength() > 0) {
+	                int rangeStart = previousSelectedPerimeters.get(0).y.start;
+	                int rangeEnd = previousSelectedPerimeters.get(previousSelectedPerimeters.getLength() - 1).y.end;
+	
+	                Bounds previousSelectionBounds = getRowBounds(rangeStart);
+	                previousSelectionBounds = previousSelectionBounds.union(getRowBounds(rangeEnd));
+	                repaintComponent(previousSelectionBounds);
+	            }
+	
+	            // Repaint the area occupied by the current selection
+	            Sequence<com.ott.fazet.wtk.Rectangle> selectedPerimeters = tableView.getSelectedPerimeters();
+	            if (selectedPerimeters.getLength() > 0) {
+	                int rangeStart = selectedPerimeters.get(0).y.start;
+	                int rangeEnd = selectedPerimeters.get(selectedPerimeters.getLength() - 1).y.end;
+	
+	                Bounds selectionBounds = getRowBounds(rangeStart);
+	                selectionBounds = selectionBounds.union(getRowBounds(rangeEnd));
+	                repaintComponent(selectionBounds);
+	
+	                // Ensure that the selection is visible
+	                Bounds visibleSelectionBounds = tableView.getVisibleArea(selectionBounds);
+	                if (visibleSelectionBounds != null
+	                    && visibleSelectionBounds.height < selectionBounds.height) {
+	                    // TODO Repainting the entire component is a workaround for PIVOT-490
+	                    repaintComponent();
+	
+	                    tableView.scrollAreaToVisible(selectionBounds);
+	                }
+	            }
+	        } else {
+	            validateSelection = true;
+	        }
+	    }
+	}
+	
+	@Override
+	public void selectedCellChanged(FazetTableView tableView,
+			Object previousSelectedCell) {
+		// TODO Auto-generated method stub
 		
-		                Bounds previousSelectionBounds = getRowBounds(rangeStart);
-		                previousSelectionBounds = previousSelectionBounds.union(getRowBounds(rangeEnd));
-		                repaintComponent(previousSelectionBounds);
-		            }
-		
-		            // Repaint the area occupied by the current selection
-		            Sequence<com.ott.fazet.wtk.Rectangle> selectedPerimeters = tableView.getSelectedPerimeters();
-		            if (selectedPerimeters.getLength() > 0) {
-		                int rangeStart = selectedPerimeters.get(0).y.start;
-		                int rangeEnd = selectedPerimeters.get(selectedPerimeters.getLength() - 1).y.end;
-		
-		                Bounds selectionBounds = getRowBounds(rangeStart);
-		                selectionBounds = selectionBounds.union(getRowBounds(rangeEnd));
-		                repaintComponent(selectionBounds);
-		
-		                // Ensure that the selection is visible
-		                Bounds visibleSelectionBounds = tableView.getVisibleArea(selectionBounds);
-		                if (visibleSelectionBounds != null
-		                    && visibleSelectionBounds.height < selectionBounds.height) {
-		                    // TODO Repainting the entire component is a workaround for PIVOT-490
-		                    repaintComponent();
-		
-		                    tableView.scrollAreaToVisible(selectionBounds);
-		                }
-		            }
-		        } else {
-		            validateSelection = true;
-		        }
-		    }
 	}
 }

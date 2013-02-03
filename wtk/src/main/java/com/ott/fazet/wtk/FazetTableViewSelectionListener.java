@@ -33,13 +33,13 @@ public interface FazetTableViewSelectionListener extends TableViewSelectionListe
         }
 
 		@Override
-		public void selectedCellAdded(FazetTableView tableView, Span rangeX,
+		public void selectedPerimeterAdded(FazetTableView tableView, Span rangeX,
 				Span rangeY) {
             // empty block
 		}
 
 		@Override
-		public void selectedCellRemoved(FazetTableView tableView, Span rangeX,
+		public void selectedPerimeterRemoved(FazetTableView tableView, Span rangeX,
 				Span rangeY) {
             // empty block
 		}
@@ -69,7 +69,7 @@ public interface FazetTableViewSelectionListener extends TableViewSelectionListe
      * @param rangeEnd
      * The end index of the range that was added, inclusive.
      */
-    public void selectedCellAdded(FazetTableView tableView, Span rangeX, Span rangeY);
+    public void selectedPerimeterAdded(FazetTableView tableView, Span rangeX, Span rangeY);
 
     /**
      * Called when a range has been removed from a table view's selection.
@@ -83,7 +83,7 @@ public interface FazetTableViewSelectionListener extends TableViewSelectionListe
      * @param rangeEnd
      * The end index of the range that was removed, inclusive.
      */
-    public void selectedCellRemoved(FazetTableView tableView, Span rangeX, Span rangeY);
+    public void selectedPerimeterRemoved(FazetTableView tableView, Span rangeX, Span rangeY);
 
     /**
      * Called when a table view's selection state has been reset.

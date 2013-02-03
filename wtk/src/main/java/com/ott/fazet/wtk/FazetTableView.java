@@ -160,14 +160,12 @@ public class FazetTableView extends TableView {
 
         int n = removedPerimeters.getLength();
         for (int i = 0; i < n; i++) {
-        	Rectangle removedRange = removedPerimeters.get(i);
-        	//TODO selectedPerimeterRemoved
-            //tableViewSelectionListeners.selectedRangeRemoved(this, removedRange.start, removedRange.end);
+        	Rectangle removedPerimeter = removedPerimeters.get(i);
+            tableViewSelectionListeners.selectedPerimeterRemoved(this, removedPerimeter.x, removedPerimeter.y);
         }
 
         if (n > 0) {
-        	//TODO selectedPerimetersRemoved
-            //tableViewSelectionListeners.selectedRangesChanged(this, null);
+            tableViewSelectionListeners.selectedPerimetersChanged(this, null);
         }
 
         return removedPerimeters;
@@ -205,14 +203,12 @@ public class FazetTableView extends TableView {
 
         int n = addedPerimeters.getLength();
         for (int i = 0; i < n; i++) {
-        	Rectangle addedRange = addedPerimeters.get(i);
-        	//TODO selectedPerimeterAdded
-            //tableViewSelectionListeners.selectedRangeAdded(this, addedRange.start, addedRange.end);
+        	Rectangle addedPerimeter = addedPerimeters.get(i);
+            tableViewSelectionListeners.selectedPerimeterAdded(this, addedPerimeter.x, addedPerimeter.y);
         }
 
         if (n > 0) {
-        	//TODO selectedPerimetersChanged
-            //tableViewSelectionListeners.selectedRangesChanged(this, null);
+            tableViewSelectionListeners.selectedPerimetersChanged(this, null);
         }
 
         return addedPerimeters;

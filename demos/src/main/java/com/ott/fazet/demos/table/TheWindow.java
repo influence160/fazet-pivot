@@ -99,7 +99,7 @@ public class TheWindow extends Window implements Bindable {
 			}
 
 			@Override
-			public void selectedCellAdded(FazetTableView tableView, Span rangeX,
+			public void selectedPerimeterAdded(FazetTableView tableView, Span rangeX,
 					Span rangeY) {
 				// TODO Auto-generated method stub
 				StringBuilder sb = new StringBuilder("selectedPerimeterAdded ")
@@ -109,7 +109,7 @@ public class TheWindow extends Window implements Bindable {
 			}
 
 			@Override
-			public void selectedCellRemoved(FazetTableView tableView, Span rangeX,
+			public void selectedPerimeterRemoved(FazetTableView tableView, Span rangeX,
 					Span rangeY) {
 				// TODO Auto-generated method stub
 				insertText("selectedCellRemoved");
