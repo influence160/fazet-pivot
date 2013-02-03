@@ -25,6 +25,25 @@ limitations under the License.
     <BoxPane>
 	    <BoxPane orientation="vertical">
 			<Label text="Fazet Table view"/>
+            <bxml:define>
+                <ButtonGroup bxml:id="fgroup"/>
+            </bxml:define>
+	        <GridPane columnCount="2" styles="{horizontalSpacing:1, verticalSpacing:1}">
+	            <GridPane.Row>
+		            <RadioButton bxml:id="noneButton" buttonData="NONE" buttonGroup="$fgroup"/>
+	                <GridPane.Filler/>
+	            </GridPane.Row>
+	            <GridPane.Row>
+		            <RadioButton bxml:id="singleButton" buttonData="SINGLE" buttonGroup="$fgroup"/>
+		            <RadioButton bxml:id="multiButton" buttonData="MULTI" buttonGroup="$fgroup"/>
+	                <GridPane.Filler/>
+	            </GridPane.Row>
+	            <GridPane.Row>
+		            <RadioButton bxml:id="singleCellButton" buttonData="SINGLECELL" buttonGroup="$fgroup"/>
+		            <RadioButton bxml:id="multiCellsButton" buttonData="MULTICELLS" buttonGroup="$fgroup" selected="true"/>
+	                <GridPane.Filler/>
+	            </GridPane.Row>
+	        </GridPane>
 		    <ScrollPane>
 				<ott:FazetTableView bxml:id="tableView" selectMode="MULTICELLS" height="400">
 				    <columns>
@@ -67,6 +86,20 @@ limitations under the License.
 		    <Separator styles="{padding:40}"/>
 		<BoxPane orientation="vertical">
 			<Label text="Pivot Table view"/>
+            <bxml:define>
+                <ButtonGroup bxml:id="sgroup"/>
+            </bxml:define>
+	        <GridPane columnCount="2" styles="{horizontalSpacing:1, verticalSpacing:1}">
+	            <GridPane.Row>
+		            <RadioButton buttonData="NONE" buttonGroup="$sgroup"/>
+	                <GridPane.Filler/>
+	            </GridPane.Row>
+	            <GridPane.Row>
+		            <RadioButton buttonData="SINGLE" buttonGroup="$sgroup"/>
+		            <RadioButton buttonData="MULTI" buttonGroup="$sgroup" selected="true"/>
+	                <GridPane.Filler/>
+	            </GridPane.Row>
+	        </GridPane>
 		    <ScrollPane>
 				<TableView bxml:id="tableView2" selectMode="MULTI" height="400">
 				    <columns>

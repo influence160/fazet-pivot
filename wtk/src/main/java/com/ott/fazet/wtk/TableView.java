@@ -1876,6 +1876,43 @@ public abstract class TableView extends Component {
      * Clears the selection.
      */
     public void clearSelection() {
+    	switch (selectMode) {
+			case SINGLE: {
+		        if (rangeSelection.getLength() > 0) {
+		            setSelectedRanges(new ArrayList<Span>(0));
+		        }
+		        break;
+			}
+    		case MULTI: {
+    	        if (rangeSelection.getLength() > 0) {
+    	            setSelectedRanges(new ArrayList<Span>(0));
+    	        }
+    	        break;
+    		}
+    		case SINGLECELL: {
+    	        if (perimeterSelection.getLength() > 0) {
+    	            setSelectedPerimeters(new ArrayList<Rectangle>(0));
+    	        }
+    	        break;
+    		}
+    		case MULTICELLS: {
+    	        if (perimeterSelection.getLength() > 0) {
+    	            setSelectedPerimeters(new ArrayList<Rectangle>(0));
+    	        }
+    	        break;
+    		}
+    		case SINGLECOLUMN: {
+    			//TODO clear selection
+    	        break;
+    		}
+    		case MULTICOLUMNS: {
+    			//TODO clear selection
+    	        break;
+    		}
+    		case NONE: {
+    			break;
+    		}
+    	}
         if (rangeSelection.getLength() > 0) {
             setSelectedRanges(new ArrayList<Span>(0));
         }

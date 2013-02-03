@@ -4,34 +4,38 @@ import java.net.URL;
 
 import org.apache.pivot.beans.BXML;
 import org.apache.pivot.beans.Bindable;
-import org.apache.pivot.collections.HashMap;
 import org.apache.pivot.collections.Map;
 import org.apache.pivot.collections.Sequence;
-import org.apache.pivot.util.Filter;
 import org.apache.pivot.util.Resources;
+import org.apache.pivot.wtk.ButtonGroup;
+import org.apache.pivot.wtk.ButtonGroupListener;
 import org.apache.pivot.wtk.Component;
 import org.apache.pivot.wtk.ComponentMouseButtonListener;
+import org.apache.pivot.wtk.Mouse.Button;
 import org.apache.pivot.wtk.Span;
 import org.apache.pivot.wtk.TextArea;
 import org.apache.pivot.wtk.Window;
-import org.apache.pivot.wtk.Mouse.Button;
 
 import com.ott.fazet.wtk.FazetTableView;
 import com.ott.fazet.wtk.FazetTableViewSelectionListener;
 import com.ott.fazet.wtk.Rectangle;
 import com.ott.fazet.wtk.TableView;
-import com.ott.fazet.wtk.TableViewSelectionListener;
+import com.ott.fazet.wtk.TableView.SelectMode;
 
 public class TheWindow extends Window implements Bindable {
 
     @BXML private TableView tableView;
+    @BXML private org.apache.pivot.wtk.TableView tableView2;
     @BXML private TextArea textArea;
+    @BXML private ButtonGroup fgroup;
+    @BXML private ButtonGroup sgroup;
     
     private int nbrClicks = 0;
     
     @Override
     public void initialize(Map<String, Object> namespace, URL location, Resources resources)
     {
+    	
     	//disable row 5 and 14
 //    	tableView.setDisabledRowFilter(new Filter<HashMap<Object, Object>>() {
 //
@@ -42,6 +46,8 @@ public class TheWindow extends Window implements Bindable {
 //			}
 //    		
 //		});
+    	
+    	initializeRadioButton();
     	
     	tableView.getComponentMouseButtonListeners().add(new ComponentMouseButtonListener() {
 			
@@ -71,7 +77,7 @@ public class TheWindow extends Window implements Bindable {
 					Object previousSelectedRow) {
 				StringBuilder sb = new StringBuilder("selectedRowChanged ")
 					.append("previousSelectedRow : ")
-					.append(previousSelectedRow.toString())
+					.append(previousSelectedRow)
 					.append(" selectedRow : ")
 					.append(tableView.getSelectedRow());
 				insertText(sb.toString());
@@ -142,7 +148,56 @@ public class TheWindow extends Window implements Bindable {
 		});
 	}
     
-    private void insertText(String text) {
+    private void initializeRadioButton() {
+
+    	fgroup.getButtonGroupListeners().add(new ButtonGroupListener() {
+			
+			@Override
+			public void selectionChanged(ButtonGroup buttonGroup,
+					org.apache.pivot.wtk.Button previousSelection) {
+				String selectedMode = (String) buttonGroup.getSelection().getButtonData();
+				tableView.setSelectMode(SelectMode.valueOf(selectedMode));
+			}
+			
+			@Override
+			public void buttonRemoved(ButtonGroup buttonGroup,
+					org.apache.pivot.wtk.Button button) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void buttonAdded(ButtonGroup buttonGroup,
+					org.apache.pivot.wtk.Button button) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+    	
+    	sgroup.getButtonGroupListeners().add(new ButtonGroupListener() {
+			
+			@Override
+			public void selectionChanged(ButtonGroup buttonGroup,
+					org.apache.pivot.wtk.Button previousSelection) {
+				String selectedMode = (String) buttonGroup.getSelection().getButtonData();
+				tableView2.setSelectMode(org.apache.pivot.wtk.TableView.SelectMode.valueOf(selectedMode));
+			}
+			
+			@Override
+			public void buttonRemoved(ButtonGroup buttonGroup,
+					org.apache.pivot.wtk.Button button) {
+				//nothing
+			}
+			
+			@Override
+			public void buttonAdded(ButtonGroup buttonGroup,
+					org.apache.pivot.wtk.Button button) {
+				//nothing
+			}
+		});
+	}
+
+	private void insertText(String text) {
     	if(textArea.getText() != null && !textArea.getText().isEmpty()) {
     		textArea.insertText("\n", 0);
     	}
