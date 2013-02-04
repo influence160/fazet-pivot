@@ -58,35 +58,35 @@ public interface FazetTableViewSelectionListener extends TableViewSelectionListe
     }
 
     /**
-     * Called when a range has been added to a table view's selection.
+     * Called when a perimeter of cells has been added to a table view's selection.
      *
      * @param tableView
      * The source of the event.
      *
-     * @param rangeStart
-     * The start index of the range that was added, inclusive.
+     * @param rangeX
+     * A Span that represent the start and the end column indexes of the perimeter that was added, inclusive.
      *
-     * @param rangeEnd
-     * The end index of the range that was added, inclusive.
+     * @param rangeY
+     * A Span that represent the start and the end row indexes of the perimeter that was added, inclusive.
      */
     public void selectedPerimeterAdded(FazetTableView tableView, Span rangeX, Span rangeY);
 
     /**
-     * Called when a range has been removed from a table view's selection.
+     * Called when a perimeter has been removed from a table view's selection.
      *
      * @param tableView
      * The source of the event.
      *
-     * @param rangeStart
-     * The start index of the range that was removed, inclusive.
+     * @param rangeX
+     * A Span that represent the start and the end column indexes of the perimeter that was added, inclusive.
      *
-     * @param rangeEnd
-     * The end index of the range that was removed, inclusive.
+     * @param rangeY
+     * A Span that represent the start and the end row indexes of the perimeter that was added, inclusive.
      */
     public void selectedPerimeterRemoved(FazetTableView tableView, Span rangeX, Span rangeY);
 
     /**
-     * Called when a table view's selection state has been reset.
+     * Called when a table view's selected cell has been changed.
      *
      * @param tableView
      * The source of the event.

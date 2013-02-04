@@ -1483,7 +1483,6 @@ public abstract class TableView extends Component {
         }
     }
     
-    //TODO
     /**
      * Sets the selection to a single cell.
      *
@@ -1507,12 +1506,15 @@ public abstract class TableView extends Component {
         setSelectedRanges(selectedRanges);
     }
     
-    //TODO abstract & javadoc
-    public void setSelectedPerimeter(int startX, int endX, int startY, int endY) {
-    	Span x = new Span(startX, endX);
-    	Span y = new Span(startY, endY);
-    	setSelectedPerimeter(x, y);
-    }
+    /**
+     * Sets the selection to a single perimeter.
+     *
+     * @param startX
+     * @param endX
+     * @param startY
+     * @param endY
+     */
+    public abstract void setSelectedPerimeter(int startX, int endX, int startY, int endY);
     
     
     /**
@@ -1654,7 +1656,44 @@ public abstract class TableView extends Component {
         return selectedRanges;
     }
     
-    //TODO setSelectedPerimeters(String)
+    /**
+     * Sets the selection to the given perimeters sequence.
+     *
+     * @param selectedPerimeters
+     * A JSON-formatted string containing the perimeters to select.
+     *
+     * @return
+     * The perimeters that were actually set.
+     *
+     * @see #setSelectedPerimeters(Sequence)
+     */
+    public final Sequence<Rectangle> setSelectedPerimeters(String selectedPerimeters) {
+        if (selectedPerimeters == null) {
+            throw new IllegalArgumentException("selectedRanges is null.");
+        }
+
+        try {
+            setSelectedRanges(parseSelectedRanges(selectedPerimeters));
+        } catch (SerializationException exception) {
+            throw new IllegalArgumentException(exception);
+        }
+
+        return getSelectedPerimeters();
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Sequence<Rectangle> parseSelectedPerimeters(String json)
+        throws SerializationException {
+        ArrayList<Rectangle> selectedRanges = new ArrayList<Rectangle>();
+
+        List<?> list = JSONSerializer.parseList(json);
+        for (Object item : list) {
+            Map<String, ?> map = (Map<String, ?>)item;
+            selectedRanges.add(new Rectangle(map));
+        }
+
+        return selectedRanges;
+    }
 
     /**
      * Returns the first selected index.
@@ -1667,20 +1706,12 @@ public abstract class TableView extends Component {
     }
     
     /**
-     * Returns the first selected index.
+     * Returns the first selected cell.
      *
      * @return
-     * The first selected index, or <tt>-1</tt> if nothing is selected.
-     *///abstract
-    //TODO correction
-    public Point getFirstSelectedPoint() {
-    	if (perimeterSelection.getLength() > 0) {
-    		int x = perimeterSelection.get(0).x.start;
-    		int y = perimeterSelection.get(0).y.start;
-    		return new Point(x, y);
-    	}
-        return null;
-    }
+     * The first selected cell, or <tt>null</tt> if nothing is selected.
+     */
+    public abstract Point getFirstSelectedPoint();
 
     /**
      * Returns the last selected index.
@@ -1693,17 +1724,13 @@ public abstract class TableView extends Component {
             rangeSelection.get(rangeSelection.getLength() - 1).end : -1;
     }
     
-    //abstract
-    //TODO correction & javadoc
-    public Point getLastSelectedPoint() {
-        if (perimeterSelection.getLength() > 0) {
-        	Rectangle lastSelectedRange = perimeterSelection.get(perimeterSelection.getLength() - 1);
-    		int x = lastSelectedRange.x.end;
-    		int y = lastSelectedRange.y.end;
-    		return new Point(x, y);
-        }
-        return null;
-    }
+    /**
+     * Returns the last selected cell.
+     *
+     * @return
+     * The last selected cell, or <tt>null</tt> if nothing is selected.
+     */
+    public abstract Point getLastSelectedPoint();
 
     /**
      * Adds a single index to the selection.
@@ -1933,7 +1960,6 @@ public abstract class TableView extends Component {
         return rangeSelection.containsIndex(index);
     }
     
-    //TODO
     /**
      * Returns the selection state of a given cell.
      *
@@ -1958,6 +1984,12 @@ public abstract class TableView extends Component {
         return row;
     }
     
+    /**
+     * Returns the selected cell value converted to string.
+     *
+     * @return the selected cell value converted to string if a cell is selected 
+     * <tt>null</tt>, otherwise.
+     */
     public abstract String getSelectedCellValue();
 
     @SuppressWarnings("unchecked")

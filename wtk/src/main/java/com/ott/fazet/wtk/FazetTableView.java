@@ -134,7 +134,37 @@ public class FazetTableView extends TableView {
         	, new Span(rowIndex, rowIndex));
         return (removedPerimeters.getLength() > 0);
 	}
+	
+	@Override
+	public void setSelectedPerimeter(int startX, int endX, int startY, int endY) {
+    	Span x = new Span(startX, endX);
+    	Span y = new Span(startY, endY);
+    	setSelectedPerimeter(x, y);
+    }
+	
+	@Override
+    //TODO correction
+    public Point getFirstSelectedPoint() {
+    	if (perimeterSelection.getLength() > 0) {
+    		int x = perimeterSelection.get(0).x.start;
+    		int y = perimeterSelection.get(0).y.start;
+    		return new Point(x, y);
+    	}
+        return null;
+    }
 
+	@Override
+    //TODO correction
+    public Point getLastSelectedPoint() {
+        if (perimeterSelection.getLength() > 0) {
+        	Rectangle lastSelectedRange = perimeterSelection.get(perimeterSelection.getLength() - 1);
+    		int x = lastSelectedRange.x.end;
+    		int y = lastSelectedRange.y.end;
+    		return new Point(x, y);
+        }
+        return null;
+    }
+    
 	@Override
 	public Sequence<Rectangle> removeSelectedPerimeter(Span x, Span y) {
         if (selectMode != SelectMode.MULTICELLS) {
