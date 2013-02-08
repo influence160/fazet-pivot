@@ -40,12 +40,17 @@ limitations under the License.
 	            </GridPane.Row>
 	            <GridPane.Row>
 		            <RadioButton bxml:id="singleCellButton" buttonData="SINGLECELL" buttonGroup="$fgroup"/>
-		            <RadioButton bxml:id="multiCellsButton" buttonData="MULTICELLS" buttonGroup="$fgroup" selected="true"/>
+		            <RadioButton bxml:id="multiCellsButton" buttonData="MULTICELLS" buttonGroup="$fgroup"/>
+	                <GridPane.Filler/>
+	            </GridPane.Row>
+	            <GridPane.Row>
+		            <RadioButton bxml:id="singleColumnButton" buttonData="SINGLECOLUMN" buttonGroup="$fgroup" selected="true"/>
+		            <RadioButton bxml:id="multiColumnsButton" buttonData="MULTICOLUMNS" buttonGroup="$fgroup"/>
 	                <GridPane.Filler/>
 	            </GridPane.Row>
 	        </GridPane>
 		    <ScrollPane>
-				<ott:FazetTableView bxml:id="tableView" selectMode="MULTICELLS" height="400">
+				<ott:FazetTableView bxml:id="tableView" selectMode="SINGLECOLUMN" height="400">
 				    <columns>
 				        <ott:TableView.Column name="i" width="75" headerData="i"/>
 				        <ott:TableView.Column name="a" width="75" headerData="a"/>

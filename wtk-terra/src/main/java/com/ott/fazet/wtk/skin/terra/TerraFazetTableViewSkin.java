@@ -458,8 +458,27 @@ public class TerraFazetTableViewSkin extends ComponentSkin implements TableView.
 			            graphics.setPaint(cellBackgroundColor);
 			            graphics.fillRect(columnX, rowY, columnWidth, rowHeight);
 		        	}
-                } else {
+                } else if (selectMode == SelectMode.MULTICOLUMNS||
+                		selectMode == SelectMode.SINGLECOLUMN){
                 	//TODO selectionMode = colum
+                	cellHighlighted = (highlightPoint != null && columnIndex == highlightPoint.x 
+                			&& rowIndex == highlightPoint.y);
+                	cellSelected = tableView.isColumnSelected(columnIndex);
+                	cellDisabled = tableView.isRowDisabled(rowIndex);//TODO column disabletion
+                	Color cellBackgroundColor = rowIndex % 2 == 0 ? backgroundColor : alternateRowBackgroundColor;
+                	if (cellSelected) {
+			        	cellBackgroundColor = (tableView.isFocused())
+			                ? this.selectionBackgroundColor : inactiveSelectionBackgroundColor;
+			        } else {
+			            if (cellHighlighted && showHighlight && !cellDisabled) {
+	                		cellBackgroundColor = highlightBackgroundColor;
+			            }
+			        }
+			        
+		        	if(cellBackgroundColor != null){
+			            graphics.setPaint(cellBackgroundColor);
+			            graphics.fillRect(columnX, rowY, columnWidth, rowHeight);
+		        	}
                 }
 	        	
                 Graphics2D rendererGraphics = (Graphics2D)graphics.create(columnX, rowY,
@@ -1182,7 +1201,8 @@ public class TerraFazetTableViewSkin extends ComponentSkin implements TableView.
 			            repaintComponent(getRowBounds(highlightIndex));
 			        }
 	    		}
-	    	} else if (selectMode == SelectMode.SINGLECELL || selectMode == SelectMode.MULTICELLS) {
+	    	} else if (selectMode == SelectMode.SINGLECELL || selectMode == SelectMode.MULTICELLS
+	    			|| selectMode == SelectMode.SINGLECOLUMN || selectMode == SelectMode.MULTICOLUMNS) {
 	    	    Point previousHighlightPoint = this.highlightPoint;
 	    	    int columnIndex = getColumnAt(x);
 	    	    if (columnIndex == -1) {
@@ -1218,7 +1238,8 @@ public class TerraFazetTableViewSkin extends ComponentSkin implements TableView.
 	    			selectMode == SelectMode.MULTI)) {
 	            repaintComponent(getRowBounds(highlightIndex));
 	    	} else if (highlightPoint != null && (selectMode == SelectMode.SINGLECELL ||
-    				selectMode == SelectMode.MULTICELLS)) {
+    				selectMode == SelectMode.MULTICELLS
+    				|| selectMode == SelectMode.SINGLECOLUMN || selectMode == SelectMode.MULTICOLUMNS)) {
 	    		repaintComponent(getCellBounds(highlightPoint.y, highlightPoint.x));
 	    	} else {
 	    		//TODO selectMode = column repaint highlight column
@@ -1366,6 +1387,62 @@ public class TerraFazetTableViewSkin extends ComponentSkin implements TableView.
 	                    } else {
 	                        tableView.setSelectedCell(columnIndex, rowIndex);
 	                    }
+		            }
+		        }
+		    }
+	    } else {
+	    	//Columns selection mode
+		    if (columnIndex >= 0) {
+		
+		        if (button == Mouse.Button.LEFT) {
+		            Keyboard.Modifier commandModifier = Platform.getCommandModifier();
+		
+		            if (Keyboard.isPressed(Keyboard.Modifier.SHIFT)
+		                && selectMode == TableView.SelectMode.MULTICOLUMNS) {
+		                Filter<?> disabledRowFilter = tableView.getDisabledRowFilter();
+		
+		                if (disabledRowFilter == null) {
+		                    // Select the range
+		                    int startIndex = tableView.getFirstSelectedColumnIndex();
+		                    int endIndex = tableView.getLastSelectedColumnIndex();
+		                    // if there is nothing currently selected, selected the indicated row
+		                    if (startIndex == -1) {
+		                        tableView.addSelectedColumnIndex(columnIndex);
+		                    } else {
+		                        // otherwise select the range of rows
+		                        Span selectedRange = (columnIndex > startIndex) ?
+		                            new Span(startIndex, columnIndex) : new Span(columnIndex, endIndex);
+		
+		                        ArrayList<Span> selectedRanges = new ArrayList<Span>();
+		                        selectedRanges.add(selectedRange);
+		
+		                        tableView.setSelectedColumnsRanges(selectedRanges);
+		                    }
+		                }
+		            } else if (Keyboard.isPressed(commandModifier)
+		                && selectMode == TableView.SelectMode.MULTICOLUMNS) {
+		                // Toggle the item's selection state
+		                if (tableView.isColumnSelected(columnIndex)) {
+		                    tableView.removeSelectedColumnsIndex(columnIndex);
+		                } else {
+		                    tableView.addSelectedColumnIndex(columnIndex);
+		                }
+		            } else if (Keyboard.isPressed(commandModifier)
+		                && selectMode == TableView.SelectMode.SINGLECOLUMN) {
+		                // Toggle the item's selection state
+		                if (tableView.isColumnSelected(columnIndex)) {
+		                    tableView.setSelectedColumnIndex(-1);
+		                } else {
+		                    tableView.setSelectedColumnIndex(columnIndex);
+		                }
+		            } else {
+		                if (selectMode != TableView.SelectMode.NONE) {
+		                    if (tableView.isColumnSelected(columnIndex)) {
+		                        selectIndex = columnIndex;
+		                    } else {
+		                        tableView.setSelectedColumnIndex(columnIndex);
+		                    }
+		                }
 		            }
 		        }
 		    }
@@ -1833,7 +1910,87 @@ public class TerraFazetTableViewSkin extends ComponentSkin implements TableView.
 	@Override
 	public void selectedCellChanged(FazetTableView tableView,
 			Object previousSelectedCell) {
-		// TODO Auto-generated method stub
+		// No-op
+	}
+
+	@Override
+	public void selectedColumnsRangeAdded(TableView tableView, int rangeStart,
+			int rangeEnd) {
+	    if (tableView.isValid()) {
+	        Bounds selectionBounds = getColumnBounds(rangeStart);
+	        selectionBounds = selectionBounds.union(getColumnBounds(rangeEnd));
+	        //TODO visible area
+	        repaintComponent(selectionBounds);
+	
+	        // Ensure that the selection is visible
+	        Bounds visibleSelectionBounds = tableView.getVisibleArea(selectionBounds);
+	        if (visibleSelectionBounds.height < selectionBounds.height) {
+	            tableView.scrollAreaToVisible(selectionBounds);
+	        }
+	    } else {
+	        validateSelection = true;
+	    }
+	}
+
+	@Override
+	public void selectedColumnsRangeRemoved(TableView tableView,
+			int rangeStart, int rangeEnd) {
+	    // Repaint the area containing the removed selection
+	    if (tableView.isValid()) {
+	        Bounds selectionBounds = getColumnBounds(rangeStart);
+	        selectionBounds = selectionBounds.union(getColumnBounds(rangeEnd));
+	        //TODO visible area
+	        repaintComponent(selectionBounds);
+	    }
+	}
+
+	@Override
+	public void selectedColumnsRangesChanged(TableView tableView,
+			Sequence<Span> previousSelectedRanges) {
+	    if (previousSelectedRanges != null
+		        && previousSelectedRanges != tableView.getSelectedColumnsRanges()) {
+		        if (tableView.isValid()) {
+		            // Repaint the area occupied by the previous selection
+		            if (previousSelectedRanges.getLength() > 0) {
+		                int rangeStart = previousSelectedRanges.get(0).start;
+		                int rangeEnd = previousSelectedRanges.get(previousSelectedRanges.getLength() - 1).end;
 		
+		                Bounds previousSelectionBounds = getColumnBounds(rangeStart);
+		                previousSelectionBounds = previousSelectionBounds.union(getColumnBounds(rangeEnd));
+		              //TODO visible area
+		                repaintComponent(previousSelectionBounds);
+		            }
+		
+		            // Repaint the area occupied by the current selection
+		            Sequence<Span> selectedRanges = tableView.getSelectedColumnsRanges();
+		            if (selectedRanges.getLength() > 0) {
+		                int rangeStart = selectedRanges.get(0).start;
+		                int rangeEnd = selectedRanges.get(selectedRanges.getLength() - 1).end;
+		
+		                Bounds selectionBounds = getColumnBounds(rangeStart);
+		                selectionBounds = selectionBounds.union(getColumnBounds(rangeEnd));
+		              //TODO visible area
+		                repaintComponent(selectionBounds);
+		
+		                // Ensure that the selection is visible
+		                Bounds visibleSelectionBounds = tableView.getVisibleArea(selectionBounds);
+		                if (visibleSelectionBounds != null
+		                    && visibleSelectionBounds.height < selectionBounds.height) {
+		                    // TODO Repainting the entire component is a workaround for PIVOT-490
+		                    repaintComponent();
+		
+		                    tableView.scrollAreaToVisible(selectionBounds);
+		                }
+		            }
+		        } else {
+		            validateSelection = true;
+		        }
+		    }
+	}
+
+	@Override
+	public void selectedColumnChanged(TableView tableView,
+			Object previousSelectedRow) {
+		//No-op
 	}
 }

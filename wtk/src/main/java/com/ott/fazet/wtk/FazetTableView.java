@@ -4,7 +4,10 @@ import org.apache.pivot.collections.ArrayList;
 import org.apache.pivot.collections.List;
 import org.apache.pivot.collections.Sequence;
 import org.apache.pivot.wtk.Point;
+import org.apache.pivot.wtk.RangeSelection;
 import org.apache.pivot.wtk.Span;
+
+import com.ott.fazet.wtk.TableView.SelectMode;
 
 public class FazetTableView extends TableView {
 	
@@ -49,6 +52,57 @@ public class FazetTableView extends TableView {
         setSelectedPerimeters(selectedPerimeters);
 	}
 
+    public Sequence<Span> setSelectedColumnsRanges(Sequence<Span> selectedRanges) {
+        if (selectedRanges == null) {
+            throw new IllegalArgumentException("selectedRanges is null.");
+        }
+
+        // When we're in mode NONE, the only thing we can do is to clear the selection
+        if (selectMode == SelectMode.NONE
+            && selectedRanges.getLength() > 0) {
+            throw new IllegalArgumentException("Selection is not enabled.");
+        }
+        
+        if (selectMode != SelectMode.SINGLECOLUMN
+            && selectMode != SelectMode.MULTICOLUMNS) {
+            throw new IllegalArgumentException("Selection mode is not a column selection mode.");
+        }
+        
+        // Update the selection
+        Sequence<Span> previousSelectedRanges = this.columnsSelection.getSelectedRanges();
+        Object previousSelectedRow = (selectMode == SelectMode.SINGLE) ? getSelectedRow() : null;
+
+        RangeSelection listSelection = new RangeSelection();
+        for (int i = 0, n = selectedRanges.getLength(); i < n; i++) {
+            Span range = selectedRanges.get(i);
+
+            if (range == null) {
+                throw new IllegalArgumentException("range is null.");
+            }
+
+            if (range.start < 0) {
+                throw new IndexOutOfBoundsException("range.start < 0, " + range.start);
+            }
+            if (range.end >= columnSequence.getLength()) {
+                throw new IndexOutOfBoundsException("range.end >= tableData length, "
+                            + range.end + " >= " + columnSequence.getLength());
+            }
+
+            listSelection.addRange(range.start, range.end);
+        }
+
+        this.columnsSelection = listSelection;
+
+        // Notify listeners
+        tableViewSelectionListeners.selectedColumnsRangesChanged(this, previousSelectedRanges);
+
+        if (selectMode == SelectMode.SINGLE) {
+            tableViewSelectionListeners.selectedColumnChanged(this, previousSelectedRow);
+        }
+
+        return getSelectedColumnsRanges();
+    }
+    
 	@Override
 	public Sequence<Rectangle> setSelectedPerimeters(ArrayList<Rectangle> selectedPerimeters) {
 		// TODO Auto-generated method stub
@@ -60,6 +114,11 @@ public class FazetTableView extends TableView {
         if (selectMode == SelectMode.NONE
             && selectedPerimeters.getLength() > 0) {
             throw new IllegalArgumentException("Selection is not enabled.");
+        }
+        
+        if (selectMode != SelectMode.SINGLECELL
+            && selectMode != SelectMode.MULTICELLS) {
+            throw new IllegalArgumentException("Selection mode is not a cell selection mode.");
         }
 
         // Update the selection
@@ -162,7 +221,35 @@ public class FazetTableView extends TableView {
         }
         return null;
     }
-    
+
+    public Sequence<Span> removeSelectedColumnsRange(int start, int end) {
+        if (selectMode != SelectMode.MULTICOLUMNS) {
+            throw new IllegalStateException("Table view is not in multi-columns-select mode.");
+        }
+
+        if (start < 0) {
+            throw new IndexOutOfBoundsException("start < 0, " + start);
+        }
+        if (end >= columnSequence.getLength()) {
+            throw new IndexOutOfBoundsException("end >= columnSequence.getLength(), "
+                  + end + " >= " + columnSequence.getLength());
+        }
+
+        Sequence<Span> removedRanges = columnsSelection.removeRange(start, end);
+
+        int n = removedRanges.getLength();
+        for (int i = 0; i < n; i++) {
+            Span removedRange = removedRanges.get(i);
+            tableViewSelectionListeners.selectedColumnsRangeRemoved(this, removedRange.start, removedRange.end);
+        }
+
+        if (n > 0) {
+            tableViewSelectionListeners.selectedColumnsRangesChanged(this, null);
+        }
+
+        return removedRanges;
+    }
+
 	@Override
 	public Sequence<Rectangle> removeSelectedPerimeter(Span x, Span y) {
         if (selectMode != SelectMode.MULTICELLS) {
@@ -199,6 +286,11 @@ public class FazetTableView extends TableView {
         return removedPerimeters;
 	}
 
+    public boolean addSelectedColumnIndex(int index) {
+        Sequence<Span> addedRanges = addSelectedColumnsRange(index, index);
+        return (addedRanges.getLength() > 0);
+    }
+    
 	@Override
 	public boolean addSelectedCell(int columnIndex, int rowIndex) {
         Sequence<Rectangle> addedPerimeters = addSelectedPerimeter(new Span(columnIndex, columnIndex)
@@ -206,6 +298,34 @@ public class FazetTableView extends TableView {
         return (addedPerimeters.getLength() > 0);
 	}
 
+    public Sequence<Span> addSelectedColumnsRange(int start, int end) {
+        if (selectMode != SelectMode.MULTICOLUMNS) {
+            throw new IllegalStateException("Table view is not in multi-columns-select mode.");
+        }
+
+        if (start < 0) {
+            throw new IndexOutOfBoundsException("start < 0, " + start);
+        }
+        if (end >= columnSequence.getLength()) {
+            throw new IndexOutOfBoundsException("end >= tableData.getLength(), "
+                  + end + " >= " + columnSequence.getLength());
+        }
+
+        Sequence<Span> addedRanges = columnsSelection.addRange(start, end);
+
+        int n = addedRanges.getLength();
+        for (int i = 0; i < n; i++) {
+            Span addedRange = addedRanges.get(i);
+            tableViewSelectionListeners.selectedColumnsRangeAdded(this, addedRange.start, addedRange.end);
+        }
+
+        if (n > 0) {
+            tableViewSelectionListeners.selectedColumnsRangesChanged(this, null);
+        }
+
+        return addedRanges;
+    }
+    
 	@Override
 	public Sequence<Rectangle> addSelectedPerimeter(Span x, Span y) {
         if (selectMode != SelectMode.MULTICELLS) {

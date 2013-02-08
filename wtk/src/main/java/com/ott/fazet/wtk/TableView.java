@@ -1048,6 +1048,38 @@ public abstract class TableView extends Component {
 	            listener.selectedPerimetersChanged(tableView, previousSelectedRanges);
 	        }
 		}
+
+		@Override
+		public void selectedColumnsRangeAdded(TableView tableView,
+				int rangeStart, int rangeEnd) {
+	        for (FazetTableViewSelectionListener listener : this) {
+	            listener.selectedColumnsRangeAdded(tableView, rangeStart, rangeEnd);
+	        }
+		}
+
+		@Override
+		public void selectedColumnsRangeRemoved(TableView tableView,
+				int rangeStart, int rangeEnd) {
+	        for (FazetTableViewSelectionListener listener : this) {
+	            listener.selectedColumnsRangeRemoved(tableView, rangeStart, rangeEnd);
+	        }
+		}
+
+		@Override
+		public void selectedColumnsRangesChanged(TableView tableView,
+				Sequence<Span> previousSelectedRanges) {
+	        for (FazetTableViewSelectionListener listener : this) {
+	            listener.selectedColumnsRangesChanged(tableView, previousSelectedRanges);
+	        }
+		}
+
+		@Override
+		public void selectedColumnChanged(TableView tableView,
+				Object previousSelectedRow) {
+	        for (FazetTableViewSelectionListener listener : this) {
+	            listener.selectedColumnChanged(tableView, previousSelectedRow);
+	        }
+		}
     }
 
     private static class TableViewSortListenerList extends WTKListenerList<TableViewSortListener>
@@ -1161,6 +1193,7 @@ public abstract class TableView extends Component {
     private RowEditor rowEditor = null;
 
     private RangeSelection rangeSelection = new RangeSelection();
+    protected RangeSelection columnsSelection = new RangeSelection();
     protected PerimeterSelection perimeterSelection = new PerimeterSelection();
     
     protected SelectMode selectMode = SelectMode.SINGLE;
@@ -1460,6 +1493,16 @@ public abstract class TableView extends Component {
     }
     
     /**
+     * Returns the currently selected column index
+     *
+     * @return
+     * The currently selected column index.
+     */
+    public int getSelectedColumnIndex() {
+        return getFirstSelectedColumnIndex();
+    }
+    
+    /**
      * Returns the currently selected cell position.
      *
      * @return
@@ -1484,6 +1527,20 @@ public abstract class TableView extends Component {
     }
     
     /**
+     * Sets the selection to a single index.
+     *
+     * @param index
+     * The index to select, or <tt>-1</tt> to clear the selection.
+     */
+    public void setSelectedColumnIndex(int index) {
+        if (index == -1) {
+            clearSelection();
+        } else {
+            setSelectedColumnsRange(index, index);
+        }
+    }
+    
+    /**
      * Sets the selection to a single cell.
      *
      * @param columnIndex
@@ -1504,6 +1561,19 @@ public abstract class TableView extends Component {
         selectedRanges.add(new Span(start, end));
 
         setSelectedRanges(selectedRanges);
+    }
+    
+    /**
+     * Sets the columns selection to a single range.
+     *
+     * @param start
+     * @param end
+     */
+    public void setSelectedColumnsRange(int start, int end) {
+        ArrayList<Span> selectedRanges = new ArrayList<Span>();
+        selectedRanges.add(new Span(start, end));
+
+        setSelectedColumnsRanges(selectedRanges);
     }
     
     /**
@@ -1535,6 +1605,18 @@ public abstract class TableView extends Component {
      */
     public ImmutableList<Span> getSelectedRanges() {
         return rangeSelection.getSelectedRanges();
+    }
+    
+    /**
+     * Returns the currently selected columns ranges.
+     *
+     * @return
+     * An immutable list containing the currently selected columns ranges. Note that the returned
+     * list is a wrapper around the actual selection, not a copy. Any changes made to the
+     * selection state will be reflected in the list, but events will not be fired.
+     */
+    public ImmutableList<Span> getSelectedColumnsRanges() {
+        return columnsSelection.getSelectedRanges();
     }
     
     /**
@@ -1604,7 +1686,18 @@ public abstract class TableView extends Component {
 
         return getSelectedRanges();
     }
-
+    
+    /**
+     * Sets the columns selection to the given range sequence. Any overlapping or
+     * connecting ranges will be consolidated, and the resulting selection will
+     * be sorted in ascending order.
+     *
+     * @param selectedRanges
+     *
+     * @return
+     * The ranges that were actually set.
+     */
+    public abstract Sequence<Span> setSelectedColumnsRanges(Sequence<Span> selectedRanges);
     /**
      * Sets the selection to the given perimeter sequence. Any overlapping or
      * connecting perimeter will be consolidated, and the resulting selection will
@@ -1656,6 +1749,8 @@ public abstract class TableView extends Component {
         return selectedRanges;
     }
     
+    //TODO setSelectedColumnsRanges(String)
+    
     /**
      * Sets the selection to the given perimeters sequence.
      *
@@ -1704,6 +1799,16 @@ public abstract class TableView extends Component {
     public int getFirstSelectedIndex() {
         return (rangeSelection.getLength() > 0) ? rangeSelection.get(0).start : -1;
     }
+
+    /**
+     * Returns the first selected column index.
+     *
+     * @return
+     * The first selected column index, or <tt>-1</tt> if nothing is selected.
+     */
+    public int getFirstSelectedColumnIndex() {
+        return (columnsSelection.getLength() > 0) ? columnsSelection.get(0).start : -1;
+    }
     
     /**
      * Returns the first selected cell.
@@ -1722,6 +1827,17 @@ public abstract class TableView extends Component {
     public int getLastSelectedIndex() {
         return (rangeSelection.getLength() > 0) ?
             rangeSelection.get(rangeSelection.getLength() - 1).end : -1;
+    }
+
+    /**
+     * Returns the last selected column index.
+     *
+     * @return
+     * The last selected column index, or <tt>-1</tt> if nothing is selected.
+     */
+    public int getLastSelectedColumnIndex() {
+        return (columnsSelection.getLength() > 0) ?
+        		columnsSelection.get(columnsSelection.getLength() - 1).end : -1;
     }
     
     /**
@@ -1747,8 +1863,20 @@ public abstract class TableView extends Component {
         return (addedRanges.getLength() > 0);
     }
 
+    /**
+     * Adds a single index to the columns selection.
+     *
+     * @param index
+     * The index to add.
+     *
+     * @return
+     * <tt>true</tt> if the index was added to the columns selection; <tt>false</tt>,
+     * otherwise.
+     */
+    public abstract boolean addSelectedColumnIndex(int index);
+
     public abstract boolean addSelectedCell(int columnIndex, int rowIndex);
-    
+
     /**
      * Adds a range of indexes to the selection.
      *
@@ -1788,6 +1916,20 @@ public abstract class TableView extends Component {
 
         return addedRanges;
     }
+
+    /**
+     * Adds a range of indexes to the columns selection.
+     *
+     * @param start
+     * The first index in the range.
+     *
+     * @param end
+     * The last index in the range.
+     *
+     * @return
+     * The ranges that were added to the columns selection.
+     */
+    public abstract Sequence<Span> addSelectedColumnsRange(int start, int end);
     
     public abstract Sequence<Rectangle> addSelectedPerimeter(Span x, Span y); 
 
@@ -1809,6 +1951,23 @@ public abstract class TableView extends Component {
     }
 
     /**
+     * Adds a range of indexes to the columns selection.
+     *
+     * @param range
+     * The range to add.
+     *
+     * @return
+     * The ranges that were added to the columns selection.
+     */
+    public Sequence<Span> addSelectedColumnsRange(Span range) {
+        if (range == null) {
+            throw new IllegalArgumentException("range is null.");
+        }
+
+        return addSelectedColumnsRange(range.start, range.end);
+    }
+
+    /**
      * Removes a single index from the selection.
      *
      * @param index
@@ -1820,6 +1979,21 @@ public abstract class TableView extends Component {
      */
     public boolean removeSelectedIndex(int index) {
         Sequence<Span> removedRanges = removeSelectedRange(index, index);
+        return (removedRanges.getLength() > 0);
+    }
+
+    /**
+     * Removes a single index from the columns selection.
+     *
+     * @param index
+     * The index to remove.
+     *
+     * @return
+     * <tt>true</tt> if the index was removed from the columns selection;
+     * <tt>false</tt>, otherwise.
+     */
+    public boolean removeSelectedColumnsIndex(int index) {
+        Sequence<Span> removedRanges = removeSelectedColumnsRange(index, index);
         return (removedRanges.getLength() > 0);
     }
 
@@ -1865,6 +2039,20 @@ public abstract class TableView extends Component {
         return removedRanges;
     }
 
+    /**
+     * Removes a range of indexes from the columns selection.
+     *
+     * @param start
+     * The start of the range to remove.
+     *
+     * @param end
+     * The end of the range to remove.
+     *
+     * @return
+     * The ranges that were removed from the columns selection.
+     */
+    public abstract Sequence<Span> removeSelectedColumnsRange(int start, int end);
+    
     public abstract Sequence<Rectangle> removeSelectedPerimeter(Span x, Span y);
     
     public Sequence<Rectangle> removeSelectedPerimeter(Rectangle perimeter){
@@ -1892,11 +2080,57 @@ public abstract class TableView extends Component {
         return removeSelectedRange(range.start, range.end);
     }
 
+
+    /**
+     * Removes a range of indexes from the columns selection.
+     *
+     * @param range
+     * The range to remove.
+     *
+     * @return
+     * The ranges that were removed from the columns selection.
+     */
+    public Sequence<Span> removeSelectedColumnsRange(Span range) {
+        if (range == null) {
+            throw new IllegalArgumentException("range is null.");
+        }
+
+        return removeSelectedColumnsRange(range.start, range.end);
+    }
+
     /**
      * Selects all rows in the table.
      */
     public void selectAll() {
-        setSelectedRange(0, tableData.getLength() - 1);
+    	switch (selectMode) {
+			case SINGLE: {
+		        setSelectedRange(0, tableData.getLength() - 1);
+		        break;
+			}
+    		case MULTI: {
+    	        setSelectedRange(0, tableData.getLength() - 1);
+    	        break;
+    		}
+    		case SINGLECELL: {
+    	        setSelectedPerimeter(0, columnSequence.getLength() - 1, 0, tableData.getLength() - 1);
+    	        break;
+    		}
+    		case MULTICELLS: {
+    	        setSelectedPerimeter(0, columnSequence.getLength() - 1, 0, tableData.getLength() - 1);
+    	        break;
+    		}
+    		case SINGLECOLUMN: {
+    	        setSelectedColumnsRange(0, columnSequence.getLength() - 1);
+    	        break;
+    		}
+    		case MULTICOLUMNS: {
+    	        setSelectedColumnsRange(0, columnSequence.getLength() - 1);
+    	        break;
+    		}
+    		case NONE: {
+    			break;
+    		}
+    	}
     }
 
     /**
@@ -1929,20 +2163,21 @@ public abstract class TableView extends Component {
     	        break;
     		}
     		case SINGLECOLUMN: {
-    			//TODO clear selection
+    	        if (columnsSelection.getLength() > 0) {
+    	            setSelectedColumnsRanges(new ArrayList<Span>(0));
+    	        }
     	        break;
     		}
     		case MULTICOLUMNS: {
-    			//TODO clear selection
+    	        if (columnsSelection.getLength() > 0) {
+    	            setSelectedColumnsRanges(new ArrayList<Span>(0));
+    	        }
     	        break;
     		}
     		case NONE: {
     			break;
     		}
     	}
-        if (rangeSelection.getLength() > 0) {
-            setSelectedRanges(new ArrayList<Span>(0));
-        }
     }
 
     /**
@@ -1958,6 +2193,21 @@ public abstract class TableView extends Component {
         indexBoundsCheck("index", index, 0, tableData.getLength() - 1);
 
         return rangeSelection.containsIndex(index);
+    }
+    
+    /**
+     * Returns the selection state of a given column index.
+     *
+     * @param index
+     * The index of the column whose selection state is to be tested.
+     *
+     * @return <tt>true</tt> if the column index is selected; <tt>false</tt>,
+     * otherwise.
+     */
+    public boolean isColumnSelected(int index) {
+        indexBoundsCheck("index", index, 0, columnSequence.getLength() - 1);
+
+        return columnsSelection.containsIndex(index);
     }
     
     /**
@@ -1983,6 +2233,10 @@ public abstract class TableView extends Component {
 
         return row;
     }
+
+    //TODO getSelectedColumn
+    //public Object getSelectedColumn()
+
     
     /**
      * Returns the selected cell value converted to string.
@@ -1996,6 +2250,8 @@ public abstract class TableView extends Component {
     public void setSelectedRow(Object row) {
         setSelectedIndex((row == null) ? -1 : ((List<Object>)tableData).indexOf(row));
     }
+    
+    //TODO setSelectedColumn
 
     public Sequence<?> getSelectedRows() {
         ArrayList<Object> rows = new ArrayList<Object>();
@@ -2011,6 +2267,8 @@ public abstract class TableView extends Component {
 
         return rows;
     }
+    
+    //TODO setSelectedColumns
 
     @SuppressWarnings("unchecked")
     public void setSelectedRows(Sequence<Object> rows) {
@@ -2036,6 +2294,8 @@ public abstract class TableView extends Component {
 
         setSelectedRanges(selectedRanges);
     }
+    
+    //TODO setSelectedColumns(Sequence<Object>)
 
     /**
      * Returns the current selection mode.

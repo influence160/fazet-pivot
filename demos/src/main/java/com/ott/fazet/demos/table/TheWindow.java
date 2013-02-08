@@ -158,6 +158,34 @@ public class TheWindow extends Window implements Bindable {
 					.append(tableView.getSelectedPerimeters());
 				insertText(sb.toString());
 			}
+
+			@Override
+			public void selectedColumnsRangeAdded(TableView tableView,
+					int rangeStart, int rangeEnd) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void selectedColumnsRangeRemoved(TableView tableView,
+					int rangeStart, int rangeEnd) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void selectedColumnsRangesChanged(TableView tableView,
+					Sequence<Span> previousSelectedRanges) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void selectedColumnChanged(TableView tableView,
+					Object previousSelectedRow) {
+				// TODO Auto-generated method stub
+				
+			}
 		});
 	}
 
