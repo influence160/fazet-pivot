@@ -15,7 +15,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
-<view:TheWindow title="Hello JavaScript!" maximized="true"
+<view:TheWindow title="Demo FazetTableView" maximized="true"
     xmlns:bxml="http://pivot.apache.org/bxml"
     xmlns:view="com.ott.fazet.demos.table"
     xmlns:ott="com.ott.fazet.wtk"

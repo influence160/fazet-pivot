@@ -4,6 +4,8 @@ import java.net.URL;
 
 import org.apache.pivot.beans.BXML;
 import org.apache.pivot.beans.Bindable;
+import org.apache.pivot.collections.HashMap;
+import org.apache.pivot.collections.List;
 import org.apache.pivot.collections.Map;
 import org.apache.pivot.collections.Sequence;
 import org.apache.pivot.util.Resources;
@@ -12,8 +14,11 @@ import org.apache.pivot.wtk.ButtonGroupListener;
 import org.apache.pivot.wtk.Component;
 import org.apache.pivot.wtk.ComponentMouseButtonListener;
 import org.apache.pivot.wtk.Mouse.Button;
+import org.apache.pivot.wtk.ButtonPressListener;
+import org.apache.pivot.wtk.PushButton;
 import org.apache.pivot.wtk.Span;
 import org.apache.pivot.wtk.TextArea;
+import org.apache.pivot.wtk.TextInput;
 import org.apache.pivot.wtk.Window;
 
 import com.ott.fazet.wtk.FazetTableView;
@@ -29,6 +34,13 @@ public class TheWindow extends Window implements Bindable {
     @BXML private TextArea textArea;
     @BXML private ButtonGroup fgroup;
     @BXML private ButtonGroup sgroup;
+    
+//    @BXML private TextInput rowIndexInput;
+//    @BXML private PushButton removeRowButton;
+//    @BXML private PushButton addRowButton;
+//    @BXML private TextInput rowIndexInput2;
+//    @BXML private PushButton removeRowButton2;
+//    @BXML private PushButton addRowButton2;
     
     private int nbrClicks = 0;
     
@@ -48,6 +60,8 @@ public class TheWindow extends Window implements Bindable {
 //		});
     	
     	initializeRadioButton();
+    	//initializePushButtons();
+    	//initializePushButtons2();
     	
     	tableView.getComponentMouseButtonListeners().add(new ComponentMouseButtonListener() {
 			
@@ -107,7 +121,6 @@ public class TheWindow extends Window implements Bindable {
 			@Override
 			public void selectedPerimeterAdded(FazetTableView tableView, Span rangeX,
 					Span rangeY) {
-				// TODO Auto-generated method stub
 				StringBuilder sb = new StringBuilder("selectedPerimeterAdded ")
 					.append("perimeter : ")
 					.append(new Rectangle(rangeX, rangeY));
@@ -147,8 +160,8 @@ public class TheWindow extends Window implements Bindable {
 			}
 		});
 	}
-    
-    private void initializeRadioButton() {
+
+	private void initializeRadioButton() {
 
     	fgroup.getButtonGroupListeners().add(new ButtonGroupListener() {
 			
@@ -162,15 +175,13 @@ public class TheWindow extends Window implements Bindable {
 			@Override
 			public void buttonRemoved(ButtonGroup buttonGroup,
 					org.apache.pivot.wtk.Button button) {
-				// TODO Auto-generated method stub
-				
+				//no thing
 			}
 			
 			@Override
 			public void buttonAdded(ButtonGroup buttonGroup,
 					org.apache.pivot.wtk.Button button) {
-				// TODO Auto-generated method stub
-				
+				//no thing
 			}
 		});
     	
@@ -203,6 +214,83 @@ public class TheWindow extends Window implements Bindable {
     	}
 		textArea.insertText(text, 0);
     }
+//    
+//    private void initializePushButtons() {
+//    	removeRowButton.getButtonPressListeners().add(new ButtonPressListener() {
+//			@Override
+//			public void buttonPressed(org.apache.pivot.wtk.Button button) {
+//				String rowString = rowIndexInput.getText();
+//				try {
+//					int rowIndex = Integer.parseInt(rowString);
+//					tableView.getTableData().remove(rowIndex, 1);
+//				} catch (Exception e) {
+//					System.out.println(e);
+//					rowIndexInput.clear();
+//				}
+//			}
+//		});
+//    	addRowButton.getButtonPressListeners().add(new ButtonPressListener() {
+//			@Override
+//			public void buttonPressed(org.apache.pivot.wtk.Button button) {
+//				HashMap<String, String> map = new HashMap<String, String>();
+//				map.put("i", String.valueOf(tableView.getTableData().getLength()));
+//				map.put("a", randomValue(100));
+//				map.put("b", randomValue(1000));
+//				map.put("c", randomValue(10000));
+//				
+//				String rowString = rowIndexInput.getText();
+//				try {
+//					int rowIndex = Integer.parseInt(rowString);
+//					((List<HashMap>)tableView.getTableData()).insert(map, rowIndex);
+//				} catch (Exception e) {
+//					System.out.println(e);
+//					((List<HashMap>)tableView.getTableData()).add(map);
+//				}
+//			}
+//		});
+//	}
+//
+//    
+//    private void initializePushButtons2() {
+//    	removeRowButton2.getButtonPressListeners().add(new ButtonPressListener() {
+//			@Override
+//			public void buttonPressed(org.apache.pivot.wtk.Button button) {
+//				String rowString = rowIndexInput2.getText();
+//				try {
+//					int rowIndex = Integer.parseInt(rowString);
+//					tableView2.getTableData().remove(rowIndex, 1);
+//				} catch (Exception e) {
+//					System.out.println(e);
+//					rowIndexInput2.clear();
+//				}
+//			}
+//		});
+//    	addRowButton2.getButtonPressListeners().add(new ButtonPressListener() {
+//			@Override
+//			public void buttonPressed(org.apache.pivot.wtk.Button button) {
+//				HashMap<String, String> map = new HashMap<String, String>();
+//				map.put("i", String.valueOf(tableView2.getTableData().getLength()));
+//				map.put("a", randomValue(100));
+//				map.put("b", randomValue(1000));
+//				map.put("c", randomValue(10000));
+//				
+//				String rowString = rowIndexInput2.getText();
+//				try {
+//					int rowIndex = Integer.parseInt(rowString);
+//					((List<HashMap>)tableView2.getTableData()).insert(map, rowIndex);
+//				} catch (Exception e) {
+//					System.out.println(e);
+//					((List<HashMap>)tableView2.getTableData()).add(map);
+//				}
+//				
+//			}
+//		});
+//	}
+//    
+//    private String randomValue(int max){
+//    	int rand = ((Double) Math.floor(Math.random() * max)).intValue();
+//    	return String.valueOf(rand);
+//    }
  
 	
 }

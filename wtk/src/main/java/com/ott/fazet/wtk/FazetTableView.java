@@ -6,8 +6,6 @@ import org.apache.pivot.collections.Sequence;
 import org.apache.pivot.wtk.Point;
 import org.apache.pivot.wtk.Span;
 
-import com.ott.fazet.wtk.TableView.SelectMode;
-
 public class FazetTableView extends TableView {
 	
     public FazetTableView() {
