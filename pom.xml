@@ -9,6 +9,13 @@
   <url>http://www.ott.com</url>
   <description>Fazet Pivot is a Table view for Apache Pivot that allow cells and columns selection</description>
   
+  <developers>
+		<developer>
+			<name>Othmen Tiliouine</name>
+			<id>otiliouine</id>
+		</developer>
+	</developers>
+  
   <properties>
   	<applicationVersion>0.1</applicationVersion>
   </properties>
